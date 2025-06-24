@@ -1,0 +1,123 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import { basename, extname } from "node:path";
+import { readFileSync } from "node:fs";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import CodeViewer from "@/components/CodeViewer.astro";
+import Badge from "@/components/Badge.astro";
+import { COLLECTION_KEYS, createSlug, getDisplayPath, getLanguage, formatCollectionName } from "@/libs/utils";
+
+export async function getStaticPaths() {
+  const collections = await Promise.all([
+    getCollection("copilot-instructions"),
+    getCollection("copilot-prompts"),
+    getCollection("settings"),
+    getCollection("extensions"),
+    getCollection("devcontainers"),
+    getCollection("settings-mcp"),
+  ]);
+
+  const paths: Array<{
+    params: { collection: string; slug: string };
+    props: { item: any };
+  }> = [];
+
+  collections.forEach((items, index) => {
+    const collectionKey = COLLECTION_KEYS[index];
+
+    items.forEach((item) => {
+      // Skip README files
+      if (item.id.toLowerCase().includes("readme")) {
+        return;
+      }
+
+      const slug = createSlug(item.id);
+
+      paths.push({
+        params: {
+          collection: collectionKey,
+          slug: slug
+        },
+        props: { item }
+      });
+    });
+  });
+
+  return paths;
+}
+
+type Props = {
+  item: CollectionEntry<
+    | "copilot-instructions"
+    | "copilot-prompts"
+    | "settings"
+    | "extensions"
+    | "devcontainers"
+    | "settings-mcp"
+  >;
+};
+
+const { item } = Astro.props;
+const { collection } = Astro.params;
+
+// Get file info
+const filePath = item.filePath || item.id;
+const fileName = basename(filePath);
+const fileExtension = extname(fileName);
+
+// Read the raw content
+const rawContent = item.filePath ? readFileSync(item.filePath, 'utf-8') : item.body || '';
+const language = getLanguage(fileExtension, rawContent);
+
+// Collection display name
+const collectionName = formatCollectionName(collection || '');
+
+// Get display path
+const displayPath = getDisplayPath(item);
+
+// Breadcrumb items
+const breadcrumbItems = [
+  { label: "Home", href: "/" },
+  { label: collectionName },
+  { label: displayPath }
+];
+---
+
+<BaseLayout
+  title={`${displayPath} - ${collectionName} | VS Code Settings Registry`}
+  description={`View and copy ${displayPath} from the ${collectionName} collection`}
+>
+  <div class="container">
+    <header class="header">
+      <Breadcrumb items={breadcrumbItems} />
+
+      <div class="file-header">
+        <h1 class="file-title">{displayPath}</h1>
+        <div class="file-meta">
+          <Badge variant="primary" text={collectionName} />
+          <Badge variant="secondary" text={language} />
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <CodeViewer
+        content={rawContent}
+        language={language}
+        fileName={displayPath}
+      />
+
+      {item.data?.description && (
+        <div class="description">
+          <h2>Description</h2>
+          <p>{item.data.description}</p>
+        </div>
+      )}
+    </main>
+  </div>
+</BaseLayout>
+
+<style>
+  @import "@/styles/pages/detail.css";
+</style>

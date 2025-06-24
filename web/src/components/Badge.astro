@@ -1,0 +1,14 @@
+---
+export interface Props {
+  variant?: 'primary' | 'secondary';
+  text: string;
+}
+
+const { variant = 'primary', text } = Astro.props;
+---
+
+<span class={`badge badge-${variant}`}>{text}</span>
+
+<style>
+  @import "@/styles/components/badge.css";
+</style>

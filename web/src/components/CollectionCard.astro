@@ -1,0 +1,46 @@
+---
+import { getFileName, createSlug } from "@/libs/utils";
+import type { CollectionItem } from "@/libs/utils";
+
+export interface Props {
+  collectionKey: string;
+  name: string;
+  items: CollectionItem[];
+  count: number;
+}
+
+const { collectionKey, name, items, count } = Astro.props;
+
+---
+
+<section class="collection">
+  <div class="collection-header">
+    <h2>{name}</h2>
+    <span class="count">{count}</span>
+  </div>
+
+  {items.length > 0 ? (
+    <ul class="file-list">
+      {items.map((item) => {
+        const fileName = getFileName(item);
+
+        return (
+          <li class="file-item">
+            <a
+              href={`/${collectionKey}/${createSlug(item.id)}`}
+              class="file-link"
+            >
+              {fileName}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  ) : (
+    <div class="empty">No items available</div>
+  )}
+</section>
+
+<style>
+  @import "@/styles/components/collection-card.css";
+</style>

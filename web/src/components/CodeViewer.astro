@@ -1,0 +1,103 @@
+---
+// Props recebidas do componente
+export interface Props {
+  content: string;
+  language: string;
+  fileName: string;
+}
+
+const { content, language, fileName } = Astro.props;
+---
+
+<div class="code-container">
+  <div class="code-header">
+    <span class="file-path">
+      <code>{fileName}</code>
+    </span>
+    <button
+      class="copy-button"
+      type="button"
+      data-content={content}
+      title="Copiar código"
+      aria-label="Copiar código para a área de transferência"
+    >
+      <!-- Ícone de cópia -->
+      <svg
+        class="copy-icon"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+        <path
+          d="m4 16c-1.1 0-2-.9-2 2-2v-10c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+        ></path>
+      </svg>
+      <span class="copy-text">Copiar</span>
+    </button>
+  </div>
+
+  <div class="code-content">
+    <pre><code class={`language-${language}`} data-language={language}>{content}</code></pre>
+  </div>
+</div>
+
+<script>
+  /**
+   * Copia texto para a área de transferência usando a Clipboard API,
+   * com fallback simples por prompt.
+   */
+  async function copyToClipboard(text: string): Promise<boolean> {
+    // 1. Tenta usar a API moderna (assíncrona)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) {
+        console.warn("[copyToClipboard] falha na Clipboard API:", err);
+      }
+    }
+
+    // 2. Fallback simples: exibe prompt para o usuário copiar manualmente
+    try {
+      // O prompt exibe a string selecionada para facilitar Ctrl+C
+      prompt("Use Ctrl+C (Cmd+C) para copiar:", text);
+      return true;
+    } catch (err) {
+      console.error("[copyToClipboard] fallback por prompt falhou:", err);
+      return false;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document
+      .querySelectorAll<HTMLButtonElement>(".copy-button")
+      .forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          const text = btn.getAttribute("data-content") ?? "";
+          const label = btn.querySelector<HTMLSpanElement>(".copy-text");
+          if (!label) return;
+
+          const original = label.textContent;
+          const success = await copyToClipboard(text);
+
+          label.textContent = success ? "Copiado!" : "Falhou";
+          btn.classList.toggle("copied", success);
+
+          setTimeout(() => {
+            label.textContent = original;
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+  });
+</script>
+
+<style>
+  @import "@/styles/components/code-viewer.css";
+</style>

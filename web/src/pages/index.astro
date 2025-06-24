@@ -1,0 +1,64 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CollectionCard from "@/components/CollectionCard.astro";
+import { COLLECTION_KEYS, formatCollectionName } from "@/libs/utils";
+
+// Get all registry collections
+const collections = await Promise.all([
+  getCollection("copilot-instructions"),
+  getCollection("copilot-prompts"),
+  getCollection("settings"),
+  getCollection("extensions"),
+  getCollection("devcontainers"),
+  getCollection("settings-mcp"),
+]);
+
+// Filter out README files and process collections
+const processedCollections = collections.map((items, index) => {
+  const key = COLLECTION_KEYS[index];
+  const filtered = items.filter(
+    (item) => !item.id.toLowerCase().includes("readme"),
+  );
+  return {
+    key,
+    name: formatCollectionName(key),
+    items: filtered,
+    count: filtered.length,
+  };
+});
+---
+
+<BaseLayout
+  title="VS Code Settings Registry"
+  description="Comprehensive collection of VS Code configurations, extensions, and development templates"
+>
+  <div class="container">
+    <header class="header">
+      <h1>VS Code Settings Registry</h1>
+      <p>
+        Curated configurations and templates for enhanced development
+        workflows
+      </p>
+    </header>
+
+    <main class="main">
+      <div class="grid">
+        {
+          processedCollections.map(({ key, name, items, count }) => (
+            <CollectionCard
+              collectionKey={key}
+              name={name}
+              items={items}
+              count={count}
+            />
+          ))
+        }
+      </div>
+    </main>
+  </div>
+</BaseLayout>
+
+<style>
+  @import "@/styles/pages/index.css";
+</style>
