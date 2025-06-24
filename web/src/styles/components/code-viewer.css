@@ -1,0 +1,126 @@
+.code-container {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.file-path {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+  background: var(--hover);
+  border-color: var(--primary);
+}
+
+.copy-button.copied {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+  /* Ensure good contrast */
+  filter: contrast(1.1);
+}
+
+.copy-icon {
+  flex-shrink: 0;
+}
+
+.code-content {
+  overflow-x: auto;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.code-content pre {
+  margin: 0;
+  padding: 1.5rem;
+  background: var(--code-bg);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.code-content code {
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.code-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-content::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+.code-content::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+  /* Better visibility across themes */
+  opacity: 0.8;
+}
+
+.code-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .code-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .copy-button {
+    align-self: flex-end;
+  }
+
+  .code-content {
+    max-height: 60vh;
+  }
+
+  .code-content pre {
+    padding: 1rem;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .code-content pre {
+    padding: 0.75rem;
+    font-size: 0.75rem;
+  }
+}
