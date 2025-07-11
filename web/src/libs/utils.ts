@@ -19,11 +19,8 @@ export function createSlug(id: string): string {
   // Remove extensions for URL generation
   slug = slug.replace(/\.(instructions|prompt)\.md$|\.(?:md|json)$/, "");
 
-  // For files in folders, take only the filename part for the slug
-  const lastSlashIndex = slug.lastIndexOf("/");
-  if (lastSlashIndex !== -1) {
-    slug = slug.slice(lastSlashIndex + 1);
-  }
+  // Keep the full path to ensure uniqueness, replacing slashes with hyphens
+  slug = slug.replace(/\//g, "-");
 
   return slug.toLowerCase();
 }
@@ -41,15 +38,20 @@ export function getFileName(item: CollectionItem): string {
 }
 
 export function getDisplayPath(item: CollectionItem): string {
-  const filePath = item.filePath || item.id;
-  const fileName = basename(filePath);
-  const dirName = basename(dirname(filePath));
+  let path = item.filePath || item.id;
 
-  if (item.collection === dirName) {
-    return fileName;
-  } else {
-    return `${dirName}/${fileName}`;
+  // Remove registry/ prefix if present
+  if (path.startsWith("registry/")) {
+    path = path.slice(9);
   }
+
+  // Remove collection name from the beginning if present
+  const collectionPrefix = `${item.collection}/`;
+  if (path.startsWith(collectionPrefix)) {
+    path = path.slice(collectionPrefix.length);
+  }
+
+  return path;
 }
 
 export function getLanguage(ext: string, content: string): string {

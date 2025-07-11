@@ -23,6 +23,8 @@ export async function getStaticPaths() {
     props: { item: any };
   }> = [];
 
+  const usedSlugs = new Set<string>();
+
   collections.forEach((items, index) => {
     const collectionKey = COLLECTION_KEYS[index];
 
@@ -33,6 +35,15 @@ export async function getStaticPaths() {
       }
 
       const slug = createSlug(item.id);
+      const routeKey = `${collectionKey}/${slug}`;
+
+      // Check for duplicate slugs within the same collection
+      if (usedSlugs.has(routeKey)) {
+        console.warn(`Duplicate slug detected: ${routeKey} for item ${item.id}`);
+        return;
+      }
+
+      usedSlugs.add(routeKey);
 
       paths.push({
         params: {
